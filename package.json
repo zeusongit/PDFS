@@ -10,5 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^2.0.489",
+    "webpack": "^4.15.1"
   }
 }
