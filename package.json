@@ -9,6 +9,8 @@
   "author": "Zeus",
   "license": "ISC",
   "dependencies": {
+    "canvas-prebuilt": "^1.6.5-prerelease.1",
+    "ejs": "^2.6.1",
     "express": "^4.16.3"
   },
   "devDependencies": {
