@@ -2,93 +2,121 @@ const express = require('express');
 const path=require('path');
 const bodyParser=require('body-parser');
 const app = express();
-var Canvas = require('canvas-prebuilt');
-var assert = require('assert');
-
-var fs = require('fs');
-var pdfjsLib = require('pdfjs-dist');
-pdfjsLib.workerSrc ="build/pdf.worker.js";
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
+
+//static file path
 app.use(express.static(path.join(__dirname,'public')));
 
+var fs = require('fs');
+
+var pdfjsLib = require('pdfjs-dist');
+pdfjsLib.workerSrc ="public/build/pdf.worker.js";
+
 app.get('/', function (req, res) {
+
+var Canvas = require('canvas-prebuilt');
+var assert = require('assert');
+
+function NodeCanvasFactory() {}
+NodeCanvasFactory.prototype = {
+  create: function NodeCanvasFactory_create(width, height) {
+    assert(width > 0 && height > 0, 'Invalid canvas size');
+    var canvas = new Canvas(width, height);
+    var context = canvas.getContext('2d');
+    return {
+      canvas: canvas,
+      context: context,
+    };
+  },
+
+  reset: function NodeCanvasFactory_reset(canvasAndContext, width, height) {
+    assert(canvasAndContext.canvas, 'Canvas is not specified');
+    assert(width > 0 && height > 0, 'Invalid canvas size');
+    canvasAndContext.canvas.width = width;
+    canvasAndContext.canvas.height = height;
+  },
+
+  destroy: function NodeCanvasFactory_destroy(canvasAndContext) {
+    assert(canvasAndContext.canvas, 'Canvas is not specified');
+
+    canvasAndContext.canvas.width = 0;
+    canvasAndContext.canvas.height = 0;
+    canvasAndContext.canvas = null;
+    canvasAndContext.context = null;
+  },
+};
+
+
 // Relative path of the PDF file.
-  var pdfURL = 'web/test.pdf';
-  // Read the PDF file into a typed array so PDF.js can load it.
-  var rawData = new Uint8Array(fs.readFileSync(pdfURL));
-  // Load the PDF file.
-  const source = {
-    data: rawData,
-    nativeImageDecoderSupport: 'none',
-    disableFontFace: true
-  } 
-  pdfjsLib.getDocument(source).then(function (pdfDocument) {
-      console.log('# PDF document loaded.'); 
-      print(pdfDocument);
+var pdfURL = 'public/web/test.pdf';
+
+// Read the PDF file into a typed array so PDF.js can load it.
+var rawData = new Uint8Array(fs.readFileSync(pdfURL));
+
+// Load the PDF file.
+const source = {
+  data: rawData,
+  nativeImageDecoderSupport: 'none',
+  disableFontFace: true
+} 
+pdfjsLib.getDocument(source).then(function (pdfDocument) {
+  console.log('# PDF document loaded.');
+
+  // Get the first page.
+  pdfDocument.getPage(1).then(function (page) {
+    // Render the page on a Node canvas with 100% scale.
+    var viewport = page.getViewport(1.0);
+    var canvasFactory = new NodeCanvasFactory();
+    var canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
+    var renderContext = {
+      canvasContext: canvasAndContext.context,
+      viewport: viewport,
+      canvasFactory: canvasFactory
+    };
+
+    page.render(renderContext);//.then(function () {
+      // Convert the canvas to an image buffer.
+      //var image = canvasAndContext.canvas.toBuffer();
+      // fs.writeFile('output.png', image, function (error) {
+      //   if (error) {
+      //     console.error('Error: ' + error);
+      //   } else {
+      //     console.log('Finished converting first page of PDF file to a PNG image.');
+      //   }
+      // });
+    //});
   });
+}).catch(function(reason) {
+  console.log(reason);
+});
+
+
+
+
+
   res.render('index');
 });
 
-function print(pdfDoc) {
-  if (!pdfDoc || !pdfDoc.numPages) {
-    return ;
-  }
 
-  var scale = 5;
-  var iframe = window.document.createElement('iframe');
-  var doc = iframe.contentDocument || iframe.contentWindow.document;
 
-  window.document.body.append(iframe);
+/* Any copyright is dedicated to the Public Domain.
+ * http://creativecommons.org/publicdomain/zero/1.0/ */
 
-  doc.open();
-  doc.write(
-    '<!DOCTYPE html>' +
-      '<html>' +
-        '<head>' +
-          '<style>' +
-            '* {margin: 0 !important; padding: 0 !important}' +
-            'div{width:612pt; height:792pt;}' +
-            'canvas{width:100%; height:100%;}' +
-        '</style>' +
-      '</head>' +
-      '<body></body>' +
-    '</html>'
-  );
-  doc.close();
+//
+// Basic node example that prints document metadata and text content.
+// Requires single file built version of PDF.js -- please run
+// `gulp singlefile` before running the example.
+//
 
-  function renderPage(num) {
-    console.log('Rendering page %d of %d', num, pdfDoc.numPages);
 
-    return pdfDoc
-      .getPage(num)
-      .then(function (page) {
-        var div = doc.createElement('div');
-        var canvas = doc.createElement('canvas');
-        div.appendChild(canvas);
-        doc.body.appendChild(div);
-        var viewport = page.getViewport(scale);
-        var ctx = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        return page.render({canvasContext: ctx, viewport: viewport}).promise;
-      })
-      .then(function () {
-        if (num < pdfDoc.numPages) {
-          return renderPage(num + 1);
-        }
-      });
-  }
 
-  renderPage(1)
-    .then(function () {
-      iframe.contentWindow.print();
-      iframe.remove();
-    });
-}
+// Loading file from file system into typed array
+
+
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
