@@ -2,14 +2,20 @@
   <head>
   </head>
   <body>
-    <iframe style="width:100%;height:500px" src="web/viewer.html?file=test.pdf#page=2"></iframe>
-    <div id="ww"><br><br><br></div>
+    <% 
+      if(!page) 
+      {     
+    %>
+    <iframe style="width:60%;height:700px" src="web/viewer.html?file=test.pdf"></iframe>
+    <% }else {%>
+      <iframe style="width:60%;height:700px" src="web/viewer.html?file=test.pdf#page=<%= page %>"></iframe>></iframe>
+      <%}%>
+
+    <div><br><a href="/<%= (parseInt(page)+parseInt(1)) %>">Next</a> | <a href="/<%= (parseInt(page)-parseInt(1)) %>">Prev</a><br><br><br>
+      <form method="POST" action="/search">
+      <input type="text" name="searchKey" id="searchKey">
+      <input type="submit" value="Search">
+    </form>
+    </div>
   </body>
-  <script src="public/js/pdfobject.js"></script>
-  <script>
-  var options = {
-    page: "2"
-};
-PDFObject.embed("public/web/viewer.html?file=public/web/test.pdf", "#ww", options);
-  </script>
 </html>

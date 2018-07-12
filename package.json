@@ -2,8 +2,9 @@
   "name": "pdfs",
   "version": "1.0.0",
   "description": "PDF search tril\u001b[Da\u001b[C\u001b[Dl app",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "server": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Zeus",
@@ -11,7 +12,8 @@
   "dependencies": {
     "canvas-prebuilt": "^1.6.5-prerelease.1",
     "ejs": "^2.6.1",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "nodemon": "^1.18.1"
   },
   "devDependencies": {
     "pdfjs-dist": "^2.0.489",

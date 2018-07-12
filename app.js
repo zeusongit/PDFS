@@ -2,121 +2,99 @@ const express = require('express');
 const path=require('path');
 const bodyParser=require('body-parser');
 const app = express();
+const fs = require('fs');
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
-
-//static file path
 app.use(express.static(path.join(__dirname,'public')));
 
-var fs = require('fs');
+const custom =require('./public/js/custom.js');
 
 var pdfjsLib = require('pdfjs-dist');
 pdfjsLib.workerSrc ="public/build/pdf.worker.js";
+var pdfPath = 'public/web/test.pdf';
+
 
 app.get('/', function (req, res) {
-
-var Canvas = require('canvas-prebuilt');
-var assert = require('assert');
-
-function NodeCanvasFactory() {}
-NodeCanvasFactory.prototype = {
-  create: function NodeCanvasFactory_create(width, height) {
-    assert(width > 0 && height > 0, 'Invalid canvas size');
-    var canvas = new Canvas(width, height);
-    var context = canvas.getContext('2d');
-    return {
-      canvas: canvas,
-      context: context,
-    };
-  },
-
-  reset: function NodeCanvasFactory_reset(canvasAndContext, width, height) {
-    assert(canvasAndContext.canvas, 'Canvas is not specified');
-    assert(width > 0 && height > 0, 'Invalid canvas size');
-    canvasAndContext.canvas.width = width;
-    canvasAndContext.canvas.height = height;
-  },
-
-  destroy: function NodeCanvasFactory_destroy(canvasAndContext) {
-    assert(canvasAndContext.canvas, 'Canvas is not specified');
-
-    canvasAndContext.canvas.width = 0;
-    canvasAndContext.canvas.height = 0;
-    canvasAndContext.canvas = null;
-    canvasAndContext.context = null;
-  },
-};
-
-
-// Relative path of the PDF file.
-var pdfURL = 'public/web/test.pdf';
-
-// Read the PDF file into a typed array so PDF.js can load it.
-var rawData = new Uint8Array(fs.readFileSync(pdfURL));
-
-// Load the PDF file.
-const source = {
-  data: rawData,
-  nativeImageDecoderSupport: 'none',
-  disableFontFace: true
-} 
-pdfjsLib.getDocument(source).then(function (pdfDocument) {
-  console.log('# PDF document loaded.');
-
-  // Get the first page.
-  pdfDocument.getPage(1).then(function (page) {
-    // Render the page on a Node canvas with 100% scale.
-    var viewport = page.getViewport(1.0);
-    var canvasFactory = new NodeCanvasFactory();
-    var canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
-    var renderContext = {
-      canvasContext: canvasAndContext.context,
-      viewport: viewport,
-      canvasFactory: canvasFactory
-    };
-
-    page.render(renderContext);//.then(function () {
-      // Convert the canvas to an image buffer.
-      //var image = canvasAndContext.canvas.toBuffer();
-      // fs.writeFile('output.png', image, function (error) {
-      //   if (error) {
-      //     console.error('Error: ' + error);
-      //   } else {
-      //     console.log('Finished converting first page of PDF file to a PNG image.');
-      //   }
-      // });
-    //});
-  });
-}).catch(function(reason) {
-  console.log(reason);
-});
-
-
-
-
-
+  res.locals.page = 1;
+  console.log(res.locals.page);
   res.render('index');
 });
 
+app.get('/:page', function (req, res) {
+  var page = req.params.page;
+  res.locals.page = page;
+  console.log("-- "+res.locals.page);
+  res.render('index');
+});
 
+app.post('/search', function (req, res) {
+  res.locals.page = 1;
+  searchKey=req.body.searchKey;
+  
+///////////////////////////////////
+// Will be using promises to load document, pages and misc data instead of
+// callback.
+var indices=[]
+pdfjsLib.getDocument(pdfPath).then(function (doc) {
+  var numPages = doc.numPages;
+  console.log('# Document Loaded');
+  console.log('Number of Pages: ' + numPages);
+  console.log();
+  
+  var lastPromise; // will be used to chain promises 
+  lastPromise = doc.getMetadata().then(function (data) {
+    console.log('# Metadata Is Loaded');
+    console.log('## Info');
+    console.log(JSON.stringify(data.info, null, 2));
+    console.log();
+    if (data.metadata) {
+      console.log('## Metadata');
+      console.log(JSON.stringify(data.metadata.getAll(), null, 2));
+      console.log();
+    }
+  });
 
-/* Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/ */
-
-//
-// Basic node example that prints document metadata and text content.
-// Requires single file built version of PDF.js -- please run
-// `gulp singlefile` before running the example.
-//
-
-
-
-// Loading file from file system into typed array
-
-
+  var loadPage = function (pageNum) {
+    return doc.getPage(pageNum).then(function (page) {
+      console.log('# Page ' + pageNum);
+      var viewport = page.getViewport(1.0 /* scale */);
+      console.log('Size: ' + viewport.width + 'x' + viewport.height);
+      console.log(" -- ");
+      return page.getTextContent().then(function (content) {
+        // Content contains lots of information about the text layout and
+        // styles, but we need only strings at the moment
+        var strings = content.items.map(function (item) {
+          return item.str;
+        });
+        console.log('## Text Content');
+        f_strings=strings.join('');
+        console.log(f_strings);
+        var temp=custom.getIndicesOf(searchKey,f_strings);
+        if(!( temp === undefined || temp.length == 0 )) {
+          indices.push(pageNum);
+        }
+        //console.log("i--"+indices);
+      }).then(function () {
+        console.log(" - ");
+      });
+    })
+  };
+  for (var i = 1; i <= numPages; i++) {
+    lastPromise = lastPromise.then(loadPage.bind(null, i));
+  }
+  return lastPromise;
+}).then(function () {
+  console.log('# End of Document');
+  console.log(indices);
+}, function (err) {
+  console.error('Error: ' + err);
+});
+///////////////////////////////////
+  res.render('index',);
+});
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
