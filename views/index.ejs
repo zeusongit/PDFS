@@ -8,14 +8,50 @@
     %>
     <iframe style="width:60%;height:700px" src="web/viewer.html?file=test.pdf"></iframe>
     <% }else {%>
-      <iframe style="width:60%;height:700px" src="web/viewer.html?file=test.pdf#page=<%= page %>"></iframe>></iframe>
-      <%}%>
+      <iframe style="width:60%;height:700px" src="web/viewer.html?file=test.pdf#page=<%= page %>"></iframe></iframe>
+    <%}%>
 
-    <div><br><a href="/<%= (parseInt(page)+parseInt(1)) %>">Next</a> | <a href="/<%= (parseInt(page)-parseInt(1)) %>">Prev</a><br><br><br>
+    <div><br><a href="/<%= (parseInt(pages[0])) %>" id="nxt">Next</a> | <a href="/<%= (parseInt(page)-parseInt(1)) %>" id="prv">Prev</a><br><br><br>
+      <%
+      for(var i = 0; i < pages.length; i++) { %>
+      <div><%= pages[i] %></div>
+      <%
+      }
+      %>
       <form method="POST" action="/search">
       <input type="text" name="searchKey" id="searchKey">
       <input type="submit" value="Search">
     </form>
     </div>
   </body>
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  <script>
+    function htmlDecode(input){
+      var e = document.createElement('div');
+      e.innerHTML = input;
+      return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    }
+    $('#nxt').click(function (e){
+            e.preventDefault();
+            var dta={ "data":JSON.parse(htmlDecode("<%= JSON.stringify(page) %>"))};
+            $.ajax({
+                type: 'POST',
+                data: dta,
+                cache: false,
+                contentType: 'application/json',
+                datatype: "json",
+                url: '/ajax',
+                success: function (result) {                            
+                    console.log("next page is: " + result.some);
+                    console.log("prev page is: " + result.some);
+                },
+                error: function() {
+                  console.log('process error');
+                }                                           
+            });
+        });
+  </script>
 </html>

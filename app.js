@@ -19,6 +19,9 @@ var pdfPath = 'public/web/test.pdf';
 
 app.get('/', function (req, res) {
   res.locals.page = 1;
+  if(!app.locals.pages){
+  app.locals.pages=[];
+  }
   console.log(res.locals.page);
   res.render('index');
 });
@@ -89,13 +92,21 @@ pdfjsLib.getDocument(pdfPath).then(function (doc) {
 }).then(function () {
   console.log('# End of Document');
   console.log(indices);
+  app.locals.pages=indices;
 }, function (err) {
   console.error('Error: ' + err);
 });
 ///////////////////////////////////
-  res.render('index',);
+  res.render('index');
+});
+
+app.post('/ajax', function (req, res) {
+  console.log("here");
+  console.log("aj-"+req.body.data);
+  res.contentType('json');
+  res.send({ some: 'json' });
 });
 
 app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+  console.log('PDFS app listening on port 3000!');
 });
