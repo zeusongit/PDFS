@@ -1,0 +1,65 @@
+<% include partial/header %>
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-4"><h3>Upload File:</h3></div>
+            <div class="col-sm-8" style="padding-top: 23px;text-align: center;">
+                    <%if(typeof msg !== "undefined"){%>
+                        <span class="alert-<%- color %>" style="padding: 10px"><%- msg %></span>
+                    <% }%>
+            </div>
+        </div>
+        <hr style="margin-top: 10px">
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="userpdf" id="userpdf" class="form-control"><br>
+        <input type="submit" value="Upload" class="btn btn-primary">
+        </form>
+        <hr>
+        <div style="width: 100%;" id="pdfcontainer" name="pdfcontainer">
+        <%if(typeof pdfFiles !== "undefined"){console.log("1-"+pdfFiles);%>
+            <div class="card" style="width: 100%;">
+                    <div class="card-header" style="font-size: 13pt">
+                        Uploaded Files
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <% for(var i=0;i<pdfFiles.length;i++){ %>
+                            <li class="list-group-item"><%= pdfFiles[i] %></li>
+                        <% } %>
+                    </ul>
+            </div>              
+        <% }%>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="row">
+                <div class="col-sm-4"><h3>Add Keyword:</h3></div>
+                <div class="col-sm-8" style="padding-top: 23px;text-align: center;">
+                        <%if(typeof kmsg !== "undefined"){%>
+                            <span class="alert-<%- kcolor %>" style="padding: 10px"><%- kmsg %></span>
+                        <% }%>
+                </div>
+            </div>
+        <hr style="margin-top: 10px">
+        <form method="POST" action="/addkeyword">
+            <input type="text" name="searchKey" id="searchKey" class="form-control"><br>
+        <input type="submit" value="Add" class="btn btn-primary">
+        </form>
+        <hr>
+        <div style="width: 100%;" id="keycontainer" name="keycontainer">
+        <%if(typeof keywords !== "undefined"){console.log("2-"+keywords);%>
+            <div class="card" style="width: 100%;">
+                    <div class="card-header" style="font-size: 13pt">
+                        Keywords
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <% for(var i=0;i<keywords.length;i++){ %>
+                         <li class="list-group-item"><%= keywords[i] %></li>
+                        <% } %>
+                    </ul>
+            </div>              
+        <% }%>
+        </div>
+    </div>
+</div>
+<% include partial/footer %>

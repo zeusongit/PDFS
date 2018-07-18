@@ -1,0 +1,61 @@
+<% include partial/header %>
+<div class="row">
+    <div class="col-sm-4">
+        <form method="POST" action="/search">
+        Select File: <input type="text" name="searchFile" id="searchFile" class="form-control"><br>
+        Select Keyword:<input type="text" name="searchKey" id="searchKey" class="form-control"><br>
+        <input type="submit" value="Search" class="btn btn-primary">
+        </form>
+        <%if(typeof msg !== "undefined"){%>
+            <br><span class="alert-<%= color %>" style="padding: 10px"><%= message %></span>
+        <% }%>
+    </div>
+    <div class="col-sm-8">
+            <a href="/#" id="prv" onclick="iterPDF('PREV')">Prev</a> | <a href="/#" id="nxt" onclick="iterPDF('NEXT')">Next</a>
+        <br>
+    <input type="hidden" id="currPage" name="currPage" value="1" />
+    <% if(locals.page){ %>
+    <iframe style="width:100%;height:800px" src="web/viewer.html?file=test.pdf#page=<%= page %>" id="ifrm"></iframe>
+    <% }else{ %>
+      <iframe style="width:100%;height:800px" src="web/viewer.html?file=test.pdf" id="ifrm"></iframe>
+  <%}%>
+</div>
+  <script>
+    function htmlDecode(input){
+      var e = document.createElement('div');
+      e.innerHTML = input;
+      return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    }
+    $('#nxt').click(function(e){
+      e.preventDefault();   
+      iterPDF("NEXT",this);
+    });
+    $('#prv').click(function(e){
+      e.preventDefault();   
+      iterPDF("PREV",this);
+    });
+    function iterPDF(action,ctrl){				     
+              var data = {};
+              data.action=action;
+              data.currPage = parseInt($('#currPage').val());
+              $.ajax({
+                type: 'POST',
+                data: JSON.stringify(data),
+				        contentType: 'application/json',
+                url: 'http://localhost:3000/ajax',						
+                success: function(dta) {
+                  if(dta.disable){
+                    $(ctrl).prop("onclick", null);$(ctrl).prop("color", "#cccccc");}
+
+                  else{
+                    $(ctrl).prop("onclick", "iterPDF('"+action+"')");$(ctrl).prop("color", "#000000");
+                    $('#currPage').val(dta.pge);
+                    var iframe = document.getElementById('ifrm');
+                    iframe.src = 'web/viewer.html?file=test.pdf#page='+dta.pge;
+                  }  
+                },
+                error  : function() { console.log('error');}
+              });				
+           }
+  </script>
+<% include partial/footer %>

@@ -1,0 +1,36 @@
+html,body { height: 100%; margin: 0px; padding: 0px; }
+.jumbotron{
+    padding:30px 40px 30px 40px !important;
+    margin-bottom: 0px !important;
+}
+.appName{
+    font-size: 35pt !important;
+    text-align: right;
+}
+.footer{
+    background-color: #003056;
+    color:white;
+}
+.card-header {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,.03);
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.list-group-item:first-child {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+.btn-primary:hover {
+    background-color: #0056b3 !important;
+}
+.btn {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}

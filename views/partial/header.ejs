@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Node Web App</title>
+     <link rel='stylesheet' href='/css/style.css' type="text/css"/>
+     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+   <script>
+      $(".nav .nav-link").on("click", function(){
+        $(".nav").find(".active").removeClass("active");
+        $(this).addClass("active");
+     });
+   </script>
+</head>
+<body>
+    <div class="jumbotron">
+        <div class="row">
+          <div class="col-xs-12 col-sm-6 col-md-4">
+            <img src="/images/logo.svg" alt="Boston Private Logo" class="Logo-Main" width="70%">
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-8">
+            <h1 class="appName"> <span style="color: #003056">PDF SEARCH APPLICATION</span></h2>
+          </div>
+        </div>
+      </div>
+    <!-- Static navbar -->
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/search">Search</a></li>
+            <li><a href="/upload">Upload</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+<div id="wrap">
+<div class="container clear-top">
