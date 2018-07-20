@@ -1,35 +1,11 @@
 const express = require('express')
 const path = require('path')
-var fs = require('fs');
 const favicon = require('serve-favicon')
 const bodyParser = require('body-parser')
-const multer = require('multer')
-const xss = require("xss");
 const expressValidator=require('express-validator');
 const custom =require('./public/js/custom.js');
 var pdfjsLib = require('pdfjs-dist');
 
-var storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, './public/uploads/pdfs')
-  },
-  filename: (req, file, cb) => {
-    cb(null, "PDFS-"+file.originalname.substring(0, file.originalname.lastIndexOf('.')) + '-' + Date.now()+(path.extname(file.originalname)).toLowerCase())
-  }
-});
-var upload = multer({
-  storage: storage,
-  fileFilter: function (req, file, callback) {
-    var ext = (path.extname(file.originalname)).toLowerCase();
-    if(ext !== '.pdf') {
-        return callback(new Error('Only pdf format files are allowed!'))
-    }
-    callback(null, true)
-  },
-  limits:{
-      fileSize: 1024*1024
-  }
-});
 
 var app = express()
 app.set('port', process.env.PORT || 3000)
@@ -44,10 +20,7 @@ app.use(expressValidator())
 app.disable( 'x-powered-by' ) ;
 
 pdfjsLib.workerSrc ="public/build/pdf.worker.js";
-const pdfPath = 'public/web/test.pdf';
-const KEYWORDFILE_Path = 'public/uploads/keywords/keyword.csv';
-const PDFDIR_Path = 'public/uploads/pdfs/';
-
+var pdfPath = 'public/web/pdfs/';
 
 app.get('/', function (req, res) {
   res.render('index');
@@ -59,16 +32,30 @@ app.get('/search/:page', function (req, res) {
   res.render('search');
 });
 app.get('/search', function (req, res) {
-  res.render('search');
+  var displaydata=custom.getData();
+  res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:"",color:""});
 });
 
 app.post('/search', function (req, res) {
   searchKey=req.body.searchKey;
-  
-var indices=[]
-var numPages=0
-msg={}
-pdfjsLib.getDocument(pdfPath).then(function (doc) {
+  fileSelect=req.body.fileSelect;
+  console.log(searchKey+" - "+fileSelect);
+  req.checkBody('fileSelect','Please select a file').notEmpty();
+  req.checkBody('searchKey','Please enter a keyword').notEmpty();
+  var err=req.validationErrors();
+  if(err){
+    var displaydata=custom.getData();
+    console.log("empty- "+err[0].msg);
+    res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:err[0].msg,color:"danger"});
+  }
+  else{
+  var message="",color="";
+  var displaydata=custom.getData(1);
+  pdfPath+=displaydata[1][fileSelect];
+  console.log("pdfpath-"+pdfPath);
+  var indices=[]
+  var numPages=0
+  pdfjsLib.getDocument(pdfPath).then(function (doc) {
   numPages = doc.numPages;
   console.log('# Document Loaded');
   console.log('Number of Pages: ' + numPages);
@@ -122,19 +109,17 @@ pdfjsLib.getDocument(pdfPath).then(function (doc) {
   app.locals.pages=indices;
   console.log(indices.length);
   if(indices.length>0){
-    msg.message="Keyword found in "+indices.length+" out of "+numPages+ " pages."
-    msg.color="success";
-    res.locals.message="Keyword found in "+indices.length+" out of "+numPages+ " pages.";
-    res.locals.color="success";
+    message="Keyword found in "+indices.length+" out of "+numPages+ " pages."
+    color="success";
   }
-  else{msg.message="Keyword not found.";msg.color="danger";}
-  console.log(JSON.stringify(msg));
+  else{message="Keyword not found.";color="danger";}
 }, function (err) {
   console.error('Error: ' + err);
 });
 ///////////////////////////////////
-
-  res.render('search',msg);
+console.log("m-"+message);
+res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:message,color:color,pdfPath:pdfPath.replace('public/web/', '')});
+}
 });
 
 app.post('/ajax', function (req, res) {
@@ -176,76 +161,11 @@ app.post('/ajax', function (req, res) {
   console.log('result: ' + JSON.stringify(result));
 	res.send(result);
 });
-var dataArray =[];
-var pdfArray =[];
-app.get('/upload', function (req, res) {
-  fs.readdir(PDFDIR_Path, (err, files) => {
-    files.forEach(file => {
-      pdfArray.push(file);
-    });
-  })
-  fs.stat(KEYWORDFILE_Path, function (err) {
-    if (err == null) {
-        console.log('File exists');
-        fs.readFile(KEYWORDFILE_Path,'utf8', function (err, fileData) {
-            if (err) throw err;
-            dataArray = fileData.split(',');
-            console.log("ea-"+dataArray);            
-        });
-    }
-    else {
-        console.log('file not exist');  
-    }
-  });  
-  res.render('upload',{keywords:dataArray,pdfFiles:pdfArray });
-});
 
-app.post('/upload', function(req, res, next){
-  upload.single('userpdf')(req, res, function (err) {
-    if (err) {
-      console.log("upload err"+err);
-      res.render('upload',{msg:err,color:"danger"});
-      return;
-    }
-    else{
-      if (req.file===undefined) {
-        console.log("empty");
-        res.render('upload',{msg:"Select a PDF file to upload.",color:"danger"});
-      } 
-      else{
-        console.log("done");
-        res.render('upload',{msg:"Upload Successful!",color:"success"});
-      }
-    }
-  });
-});
 
-app.post('/addkeyword', function(req, res){
-  req.checkBody('searchKey','Please enter a keyword').notEmpty();
-  var err=req.validationErrors();
-  if(err){
-    console.log("empty keyword- ");
-    res.render('upload',{kmsg:err[0].msg,kcolor:"danger"});
-  }
-  else{
-    fs.stat(KEYWORDFILE_Path, function (err) {
-      if (err == null) {
-          console.log('File exists');
-          fs.appendFile(KEYWORDFILE_Path,","+xss(req.body.searchKey), function (err) {
-              if (err) throw err;
-              console.log('appended to file!');
-          });
-      }
-      else {
-          console.log('New file');  
-          fs.writeFile(KEYWORDFILE_Path, xss(req.body.searchKey), function (err) {
-              if (err) throw err;
-              console.log('new file saved');
-          });
-      }
-    });
-  }
-});
+//Route Files
+let upload=require('./routes/upload');
+app.use('/upload',upload);
   
 app.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'))

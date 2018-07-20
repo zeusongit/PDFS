@@ -6,8 +6,9 @@
      <link rel='stylesheet' href='/css/style.css' type="text/css"/>
      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"/>
+     <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.1/css/all.css" integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ" crossorigin="anonymous">
    <script>
       $(".nav .nav-link").on("click", function(){
         $(".nav").find(".active").removeClass("active");
@@ -22,21 +23,29 @@
             <img src="/images/logo.svg" alt="Boston Private Logo" class="Logo-Main" width="70%">
           </div>
           <div class="col-xs-12 col-sm-6 col-md-8">
-            <h1 class="appName"> <span style="color: #003056">PDF SEARCH APPLICATION</span></h2>
+            <h1 class="appName"> <span style="color: #003057">PDF SEARCH APPLICATION</span></h2>
           </div>
         </div>
       </div>
     <!-- Static navbar -->
-    <nav class="navbar navbar-inverse">
-      <div class="container-fluid">
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Home</a></li>
-            <li><a href="/search">Search</a></li>
-            <li><a href="/upload">Upload</a></li>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+          <a class="navbar-brand" href="/">Boston Private</a>
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/search">Search</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/upload">Upload</a>
+            </li>
           </ul>
-        </div><!--/.nav-collapse -->
-      </div><!--/.container-fluid -->
-    </nav>
+        </div>
+      </nav>
 <div id="wrap">
 <div class="container clear-top">

@@ -1,25 +1,51 @@
 <% include partial/header %>
 <div class="row">
     <div class="col-sm-4">
-        <form method="POST" action="/search">
-        Select File: <input type="text" name="searchFile" id="searchFile" class="form-control"><br>
-        Select Keyword:<input type="text" name="searchKey" id="searchKey" class="form-control"><br>
+      <br>
+        <form method="POST" action="/search" autocomplete="off">
+        Select File: <select class="custom-select" name="fileSelect" id="fileSelect">
+            <option value="" disabled selected>Select a file</option>
+            <% for(var i=0;i<pdfFiles.length;i++){if(pdfFiles[i]){ %>
+              <li class="list-group-item">                 
+                 <option value="<%= i %>"><%= pdfFiles[i]  %></option>
+              </li>
+             <% }} %>
+          </select><br><br>
+         Select Keyword:<!--<input type="text" name="searchKey" id="searchKey" class="form-control"> -->
+        <div style="position:relative;height:38px;border:0;padding:0;margin:0;">
+          <select class="custom-select" style="position:absolute;top:0px;left:0px;line-height:20px;margin:0;padding:0;" onchange="document.getElementById('searchKey').value=this.options[this.selectedIndex].text; document.getElementById('idValue').value=this.options[this.selectedIndex].value;">
+             <option value="" disabled selected>--Enter/Select a keyword--</option>
+             <% for(var i=0;i<keywords.length;i++){if(keywords[i]){ %>
+              <li class="list-group-item">                 
+                 <option value="<%= keywords[i] %>"><%= keywords[i]  %></option>
+              </li>
+             <% }} %>
+          </select>
+          <input name="searchKey" id="searchKey"  class="form-control hoverSearchBox" placeholder="Enter/Select a keyword" id="searchKey" onfocus="this.select()" type="text">
+          <input name="idValue" id="idValue" type="hidden">
+          </div>
+        <br>
         <input type="submit" value="Search" class="btn btn-primary">
         </form>
+        <br>
         <%if(typeof msg !== "undefined"){%>
-            <br><span class="alert-<%= color %>" style="padding: 10px"><%= message %></span>
+          <span class="alert-<%- color %>" style="padding: 10px"><%- msg %></span>
         <% }%>
     </div>
-    <div class="col-sm-8">
-            <a href="/#" id="prv" onclick="iterPDF('PREV')">Prev</a> | <a href="/#" id="nxt" onclick="iterPDF('NEXT')">Next</a>
-        <br>
+    <div class="col-sm-8" style="text-align: center">
+    <div style="margin-bottom: 10px">
+      <button id="prv" onclick="iterPDF('PREV')" class="btn btn-info btn-sm">Prev</button> | <button id="nxt" onclick="iterPDF('NEXT')" class="btn btn-info btn-sm">Next</button>
+    </div>
     <input type="hidden" id="currPage" name="currPage" value="1" />
     <% if(locals.page){ %>
-    <iframe style="width:100%;height:800px" src="web/viewer.html?file=test.pdf#page=<%= page %>" id="ifrm"></iframe>
-    <% }else{ %>
-      <iframe style="width:100%;height:800px" src="web/viewer.html?file=test.pdf" id="ifrm"></iframe>
-  <%}%>
+    <iframe style="width:100%;height:800px" src="web/viewer.html?file=<%= pdfPath %>#page=<%= page %>" id="ifrm"></iframe>
+    <% }else{ 
+      if(typeof pdfPath !== "undefined"){ %>
+      <iframe style="width:100%;height:800px" src="web/viewer.html?file=<%= pdfPath %>" id="ifrm"></iframe>
+  <%}}%>
 </div>
+</div>
+<br>
   <script>
     function htmlDecode(input){
       var e = document.createElement('div');

@@ -3,8 +3,8 @@
 <div class="row">
     <div class="col-sm-6">
         <div class="row">
-            <div class="col-sm-4"><h3>Upload File:</h3></div>
-            <div class="col-sm-8" style="padding-top: 23px;text-align: center;">
+            <div class="col-sm-4"><h4>Upload File:</h4></div>
+            <div class="col-sm-8" style="padding-top: 10px;text-align: center;">
                     <%if(typeof msg !== "undefined"){%>
                         <span class="alert-<%- color %>" style="padding: 10px"><%- msg %></span>
                     <% }%>
@@ -12,7 +12,11 @@
         </div>
         <hr style="margin-top: 10px">
         <form method="POST" action="/upload" enctype="multipart/form-data">
-        <input type="file" name="userpdf" id="userpdf" class="form-control"><br>
+        <div class="custom-file">
+            <input type="file" name="userpdf" id="userpdf" class="custom-file-input">
+            <label class="custom-file-label text-truncate" for="userpdf">Choose File</label>
+        </div>
+        <br><br>
         <input type="submit" value="Upload" class="btn btn-primary">
         </form>
         <hr>
@@ -24,7 +28,10 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         <% for(var i=0;i<pdfFiles.length;i++){ %>
-                            <li class="list-group-item"><%= pdfFiles[i] %></li>
+                            <li class="list-group-item">
+                                <%= pdfFiles[i] %>
+                                <a href="/upload/deletePdf/<%= i %>"><i class="fas fa-trash-alt" style="float: right;color:#495057" title="Delete"></i></a>
+                            </li>
                         <% } %>
                     </ul>
             </div>              
@@ -33,16 +40,16 @@
     </div>
     <div class="col-sm-6">
         <div class="row">
-                <div class="col-sm-4"><h3>Add Keyword:</h3></div>
-                <div class="col-sm-8" style="padding-top: 23px;text-align: center;">
+                <div class="col-sm-4"><h4>Add Keyword:</h4></div>
+                <div class="col-sm-8" style="padding-top: 10px;text-align: center;">
                         <%if(typeof kmsg !== "undefined"){%>
                             <span class="alert-<%- kcolor %>" style="padding: 10px"><%- kmsg %></span>
                         <% }%>
                 </div>
             </div>
         <hr style="margin-top: 10px">
-        <form method="POST" action="/addkeyword">
-            <input type="text" name="searchKey" id="searchKey" class="form-control"><br>
+        <form method="POST" action="/upload/addkeyword">
+            <input type="text" name="searchKey" id="searchKey" class="form-control" maxlength="30"><br>
         <input type="submit" value="Add" class="btn btn-primary">
         </form>
         <hr>
@@ -53,13 +60,22 @@
                         Keywords
                     </div>
                     <ul class="list-group list-group-flush">
-                        <% for(var i=0;i<keywords.length;i++){ %>
-                         <li class="list-group-item"><%= keywords[i] %></li>
-                        <% } %>
+                        <% for(var i=0;i<keywords.length;i++){if(keywords[i]){ %>
+                         <li class="list-group-item">
+                            <%= keywords[i]  %>
+                            <a href="/upload/deleteKeyword/<%= i %>"><i class="fas fa-trash-alt" style="float: right;color:#495057" title="Delete"></i></a>
+                         </li>
+                        <% }} %>
                     </ul>
             </div>              
         <% }%>
         </div>
     </div>
 </div>
+<script>
+    $('.custom-file-input').on('change',function(){
+        var fileName = $(this).val().split('\\').pop(); 
+        $(this).next('.custom-file-label').addClass("selected").html(fileName); 
+    })
+</script>
 <% include partial/footer %>
