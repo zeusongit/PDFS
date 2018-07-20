@@ -51,11 +51,11 @@ app.post('/search', function (req, res) {
   else{
   var message="",color="";
   var displaydata=custom.getData(1);
-  pdfPath+=displaydata[1][fileSelect];
-  console.log("pdfpath-"+pdfPath);
+  var varpdf=pdfPath+displaydata[1][fileSelect];
+  console.log("varpdf-"+varpdf);
   var indices=[]
   var numPages=0
-  pdfjsLib.getDocument(pdfPath).then(function (doc) {
+  pdfjsLib.getDocument(varpdf).then(function (doc) {
   numPages = doc.numPages;
   console.log('# Document Loaded');
   console.log('Number of Pages: ' + numPages);
@@ -113,12 +113,14 @@ app.post('/search', function (req, res) {
     color="success";
   }
   else{message="Keyword not found.";color="danger";}
+  console.log("m-"+message);
+res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:message,color:color,pdfPath:varpdf.replace('public/web/', '')});
 }, function (err) {
   console.error('Error: ' + err);
+  console.log("m-"+message);
+res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:err,color:"danger"});
 });
 ///////////////////////////////////
-console.log("m-"+message);
-res.render('search',{keywords:displaydata[0],pdfFiles:displaydata[1],msg:message,color:color,pdfPath:pdfPath.replace('public/web/', '')});
 }
 });
 

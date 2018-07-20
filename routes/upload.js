@@ -10,9 +10,12 @@ router.use(express.static(path.join(__dirname, 'public')))
 router.use(expressValidator())
 const custom =require('../public/js/custom.js');
 
+const KEYWORDFILE_Path = 'public/uploads/keywords/keyword.csv';
+const PDFDIR_Path = 'public/web/pdfs/';
+
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './public/uploads/pdfs')
+    cb(null, './'+PDFDIR_Path.slice(0, -1))
   },
   filename: (req, file, cb) => {
     cb(null, "PDFS__"+file.originalname.substring(0, file.originalname.lastIndexOf('.')) + '__' + Date.now()+(path.extname(file.originalname)).toLowerCase())
@@ -34,9 +37,6 @@ var upload = multer({
 
 router.use(bodyParser.json())
 router.use(bodyParser.urlencoded({ extended: true }))
-
-const KEYWORDFILE_Path = 'public/uploads/keywords/keyword.csv';
-const PDFDIR_Path = 'public/uploads/pdfs/';
 
 router.get('/', function (req, res) {
   var displaydata=custom.getData();

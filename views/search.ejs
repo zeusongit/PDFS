@@ -47,6 +47,10 @@
 </div>
 <br>
   <script>
+    $( document ).ready(function() {
+      window.frames['ifrm'].document.getElementById('findInput').value = 'date';
+      window.frames['ifrm'].document.getElementById('findHighlightAll').checked = true;
+    });
     function htmlDecode(input){
       var e = document.createElement('div');
       e.innerHTML = input;
@@ -61,7 +65,7 @@
       iterPDF("PREV",this);
     });
     function iterPDF(action,ctrl){				     
-              var data = {};
+              var data = {};  
               data.action=action;
               data.currPage = parseInt($('#currPage').val());
               $.ajax({
@@ -74,10 +78,10 @@
                     $(ctrl).prop("onclick", null);$(ctrl).prop("color", "#cccccc");}
 
                   else{
-                    $(ctrl).prop("onclick", "iterPDF('"+action+"')");$(ctrl).prop("color", "#000000");
-                    $('#currPage').val(dta.pge);
+                    $(ctrl).prop("onclick", "iterPDF('"+action+"')");$(ctrl).prop("color", "#000000");                    
+                    $('#currPage').val(dta.pge);                    
                     var iframe = document.getElementById('ifrm');
-                    iframe.src = 'web/viewer.html?file=test.pdf#page='+dta.pge;
+                    iframe.src = 'web/viewer.html?file='+"<%= typeof pdfPath!='undefined' ? pdfPath : '' %>"+'#page='+dta.pge;
                   }  
                 },
                 error  : function() { console.log('error');}
